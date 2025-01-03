@@ -2,27 +2,8 @@ import express, { json } from 'express';
 import mongoose from 'mongoose';
 import axios from 'axios';
 
-process.env.MONGO_URI = "mongodb+srv://admin:admin@temp.eu9ff.mongodb.net/?retryWrites=true&w=majority&appName=temp";
-
 const app = express();
 app.use(express.json());
-
-// MongoDB connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => console.log('Connected to MongoDB'));
-
-// MongoDB Schema
-const medicationSchema = new mongoose.Schema({
-  name: String,
-  description: String,
-  warnings: String,
-  source: String,
-  lastUpdated: { type: Date, default: Date.now },
-});
-
-const Medication = mongoose.model('Medication', medicationSchema);
 
 // Free API configurations
 const apis = {

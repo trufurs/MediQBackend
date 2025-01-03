@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -10,8 +10,8 @@ const userSchema = new mongoose.Schema({
     dateOfBirth: { type: Date, required: true },
     gender: { type: String, enum: ['male', 'female', 'other'], required: true }
   },
-  createdAt: { type: Date, default: Date.now },
+  createdAt: { type: Date, default: Date.now , Lock: true},
   updatedAt: { type: Date, default: Date.now }
 });
 
-const User = mongoose.model('User', userSchema);
+export const User = mongoose.model('User', userSchema);

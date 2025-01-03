@@ -1,6 +1,7 @@
 const storeOwnerSchema = new mongoose.Schema({
     storeName: { type: String, required: true },
     ownerName: { type: String, required: true },
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     contact: {
       phone: { type: String, required: true },
       email: { type: String, required: true }
