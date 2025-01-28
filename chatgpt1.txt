@@ -1,0 +1,244 @@
+Ah, I see! You mean multiple stores can exist, and each store can be managed by one or more store owners. So, each store would have its own inventory and operations, and the store owners (who are different users) will be able to manage their respective stores.
+
+Let me walk you through how to design a system with multiple stores, where each store is owned and managed by one or more store owners.
+
+Scenario:
+Multiple Stores: A single user (store manager) can manage multiple stores.
+Each store has its own inventory: Each store can have its own set of medicines, stock, and orders.
+Multiple Store Owners: A store can have more than one owner, but each owner can also manage their own set of stores.
+Updated Schema Design
+We need to ensure that:
+
+Each store can have its own set of medicines.
+A user can own and manage multiple stores.
+A store can have multiple owners (users).
+The medicine stock and details are store-specific.
+1. Store Schema
+The Store schema will represent a single store with its name, location, inventory (medicines), and associated owners.
+
+javascript
+Copy code
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const storeSchema = new Schema({
+  storeName: { type: String, required: true },
+  storeLocation: { type: [Number], index: '2dsphere' },  // For geolocation (Longitude, Latitude)
+  owners: [{ type: Schema.Types.ObjectId, ref: 'User' }],  // Multiple owners (users) can manage the store
+  medicines: [{ type: Schema.Types.ObjectId, ref: 'Medicine' }],  // Medicines available in the store
+  createdAt: { type: Date, default: Date.now },
+});
+
+const Store = mongoose.model('Store', storeSchema);
+module.exports = Store;
+2. Medicine Schema
+The Medicine schema will store the details of medicines available across different stores, including stock count and expiry date.
+
+javascript
+Copy code
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const medicineSchema = new Schema({
+  name: { type: String, required: true },
+  description: String,
+  price: { type: Number, required: true },
+  manufacturer: String,
+  expiryDate: { type: Date, required: true },
+  stockCount: { type: Number, default: 0 },  // Track stock count per store
+  category: String,
+  storeLocation: { type: [Number], index: '2dsphere' },  // Geospatial location of the store
+  createdAt: { type: Date, default: Date.now },
+});
+
+const Medicine = mongoose.model('Medicine', medicineSchema);
+module.exports = Medicine;
+3. User Schema
+The User schema will represent users, which can be store owners or customers. The ownedStores array will store references to the stores they manage.
+
+javascript
+Copy code
+const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const userSchema = new Schema({
+  username: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  userRole: { type: String, enum: ['manager', 'customer'], default: 'customer' },  // Store manager or customer
+  ownedStores: [{ type: Schema.Types.ObjectId, ref: 'Store' }],  // Array of stores managed by the user
+  createdAt: { type: Date, default: Date.now },
+});
+
+// Hash password before saving to DB
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
+
+const User = mongoose.model('User', userSchema);
+module.exports = User;
+4. Order Schema
+The Order schema will represent customer orders for medicines, linked to both stores and users (customers).
+
+javascript
+Copy code
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const orderSchema = new Schema({
+  customerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  storeId: { type: Schema.Types.ObjectId, ref: 'Store', required: true },
+  items: [
+    {
+      medicineId: { type: Schema.Types.ObjectId, ref: 'Medicine', required: true },
+      quantity: { type: Number, required: true },
+      price: { type: Number, required: true },
+    }
+  ],
+  totalAmount: { type: Number, required: true },
+  orderStatus: { type: String, enum: ['Pending', 'Shipped', 'Delivered'], default: 'Pending' },
+  orderDate: { type: Date, default: Date.now },
+  deliveryDate: Date,
+});
+
+const Order = mongoose.model('Order', orderSchema);
+module.exports = Order;
+5. Stock History Schema
+The StockHistory schema will track stock changes for each store’s inventory.
+
+javascript
+Copy code
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const stockHistorySchema = new Schema({
+  storeId: { type: Schema.Types.ObjectId, ref: 'Store', required: true },  // Store where stock changed
+  medicineId: { type: Schema.Types.ObjectId, ref: 'Medicine', required: true },  // Medicine whose stock changed
+  previousStock: { type: Number, required: true },
+  newStock: { type: Number, required: true },
+  changeType: { type: String, enum: ['purchase', 'restock', 'sale'], required: true },  // Type of change
+  changeDate: { type: Date, default: Date.now },
+});
+
+const StockHistory = mongoose.model('StockHistory', stockHistorySchema);
+module.exports = StockHistory;
+API Endpoints
+Here are the key routes and actions that should be part of your API.
+
+1. Create a Store
+Allow a store manager to create a new store and specify who the owners are (initially just the manager, but can be updated to add more owners later).
+
+javascript
+Copy code
+// Create a new store
+router.post('/stores', authMiddleware, async (req, res) => {
+  try {
+    const { storeName, storeLocation } = req.body;
+    
+    const store = new Store({
+      storeName,
+      storeLocation,
+      owners: [req.user._id],  // Initially, the logged-in user is the store owner
+    });
+
+    await store.save();
+
+    // Add the store to the user's list of owned stores
+    const user = await User.findById(req.user._id);
+    user.ownedStores.push(store._id);
+    await user.save();
+
+    res.status(201).json(store);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating store', error });
+  }
+});
+2. Add Medicine to a Store
+Allow store owners to add medicines to their store’s inventory.
+
+javascript
+Copy code
+// Add a new medicine to the store's inventory
+router.post('/stores/:storeId/medicines', authMiddleware, async (req, res) => {
+  try {
+    const { storeId } = req.params;
+    const { name, price, description, manufacturer, expiryDate, stockCount, category } = req.body;
+
+    const store = await Store.findById(storeId);
+
+    if (!store) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+
+    // Check if the user is an owner of the store
+    if (!store.owners.includes(req.user._id)) {
+      return res.status(403).json({ message: 'You are not the owner of this store' });
+    }
+
+    const medicine = new Medicine({
+      name,
+      price,
+      description,
+      manufacturer,
+      expiryDate,
+      stockCount,
+      category,
+    });
+
+    await medicine.save();
+
+    // Add the medicine to the store's inventory
+    store.medicines.push(medicine._id);
+    await store.save();
+
+    res.status(201).json(medicine);
+  } catch (error) {
+    res.status(500).json({ message: 'Error adding medicine', error });
+  }
+});
+3. View All Stores Managed by a User
+Allow store managers (owners) to see all the stores they manage.
+
+javascript
+Copy code
+// Get all stores managed by the user
+router.get('/stores/owned', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate('ownedStores');
+    res.json(user.ownedStores);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching stores', error });
+  }
+});
+4. View Store Inventory
+Allow store owners to view the inventory of their store.
+
+javascript
+Copy code
+// Get the inventory of a specific store
+router.get('/stores/:storeId/inventory', authMiddleware, async (req, res) => {
+  try {
+    const store = await Store.findById(req.params.storeId).populate('medicines');
+
+    if (!store) {
+      return res.status(404).json({ message: 'Store not found' });
+    }
+
+    // Check if the user is an owner of the store
+    if (!store.owners.includes(req.user._id)) {
+      return res.status(403).json({ message: 'You are not the owner of this store' });
+    }
+
+    res.json(store.medicines);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching inventory', error });
+  }
+});
+Conclusion
+With this setup, you can have multiple stores, each store can have its own inventory, and a user (store owner) can own multiple stores. The store ownership is tracked in both the Store and User models using references (owners array in Store and ownedStores array in User).
+
+This system allows flexibility in managing multiple stores and their inventories while keeping the operations isolated to each store, but still manageable by the store owners.

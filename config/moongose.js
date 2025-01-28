@@ -1,12 +1,13 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const run = async() =>{
-      const db = await mongoose.connect(process.env.uri).then(()=>{
-          console.log('connected to database');
-      },(reason)=>{
-        console.log(`Not connected to database `);
-        throw reason;
-      }).catch((err)=>{ console.log(err);}  ); 
-      coms
+const run = async () => {
+    try {
+        await mongoose.connect(process.env.uri);
+        mongoose.connection.useDb('MediQ')
+        console.log('Connected to database');
+    } catch (error) {
+        console.error('Not connected to database:',error);
     }
-export { run};
+};
+
+export { run };

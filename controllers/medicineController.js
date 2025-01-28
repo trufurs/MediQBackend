@@ -1,7 +1,70 @@
 import  {Medication}  from '../models/mediciene.js';
 import asyncHandler from 'express-async-handler';
 
-const getMediciene = asyncHandler(async (res , req) => {    
+// @desc    Create a new medicine
+// @route   POST /api/medicines
+// @access  Public
+export const createMedicine = asyncHandler(async (req, res) => {
+  const medicineData = req.body;
+  const medicine = new Medication(medicineData);
+  const savedMedicine = await medicine.save();
+  res.status(201).json(savedMedicine);
+});
+
+// @desc    Get all medicines
+// @route   GET /api/medicines
+// @access  Public
+export const getMedicines = asyncHandler(async (req, res) => {
+  const filter = req.query || {};
+  const medicines = await Medication.find(filter);
+  res.status(200).json(medicines);
+});
+
+// @desc    Get medicine by ID
+// @route   GET /api/medicines/:id
+// @access  Public
+export const getMedicineById = asyncHandler(async (req, res) => {
+  const medicine = await Medication.findById(req.params.id);
+  if (!medicine) {
+    res.status(404);
+    throw new Error('Medicine not found');
+  }
+  res.status(200).json(medicine);
+});
+
+// @desc    Update a medicine by ID
+// @route   PUT /api/medicines/:id
+// @access  Public
+export const updateMedicine = asyncHandler(async (req, res) => {
+  const updatedMedicine = await Medication.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {
+      new: true, // Return the updated document
+      runValidators: true, // Ensure validation
+    }
+  );
+  if (!updatedMedicine) {
+    res.status(404);
+    throw new Error('Medicine not found');
+  }
+  res.status(200).json(updatedMedicine);
+});
+
+// @desc    Delete a medicine by ID
+// @route   DELETE /api/medicines/:id
+// @access  Public
+export const deleteMedicine = asyncHandler(async (req, res) => {
+  const deletedMedicine = await Medication.findByIdAndDelete(req.params.id);
+  if (!deletedMedicine) {
+    res.status(404);
+    throw new Error('Medicine not found');
+  }
+  res.status(200).json({ message: 'Medicine deleted successfully' });
+});
+
+
+/* const getMediciene = asyncHandler(async (res , req) => {    
     const mediciene = await Medication.find({});
     res.json(mediciene);
 });
@@ -68,6 +131,6 @@ const deleteMediciene = asyncHandler(async (res , req) => {
     }else{
         res.status(404).json({message: 'Mediciene not found'});
     }
-});
+}); */
 
 export {getMediciene, getMedicieneById, createMediciene, updateMediciene, deleteMediciene};

@@ -1,21 +1,32 @@
 import { Schema, model } from 'mongoose';
 
-const medicationSchema = new Schema({
+const medicineSchema = new Schema(
+  {
     name: { type: String, required: true },
-    dosage: { type: String, required: true },
+    composition: { type: String, required: true },
+    manufacturer: { type: String, required: true },
+    usage: { type: String, required: true },
+    precautions: { type: String }, 
+  },
+  {
+    timestamps: true,
+    strict: false,
+  }
+);
+
+// Create the model
+export const Medication = model('Medicine', medicineSchema);
+
+ 
+ /* const medicationSchema = new Schema({
+    name: { type: String, required: true },
+    dosage: { type: String },
     form: { type: String, required: true }, // e.g., tablet, liquid
     indications: { type: String }, // Conditions treated
-    administrationRoute: { type: String }, // e.g., oral, IV
     frequency: { type: String, required: true }, // e.g., daily
-    startDate: { type: Date, required: true },
-    endDate: { type: Date },
     sideEffects: [{ type: String }],
-    contraindications: [{ type: String }],
     precautions: [{ type: String }],
-    storageInstructions: { type: String },
-    prescribedBy: { type: String }, // Doctor's name
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    storageInstructions: { type: String },// Doctor's name
+    createdAt: { type: Date, default: Date.now }
   });
-
- export const Medication = model('Medication', medicationSchema);
+ */

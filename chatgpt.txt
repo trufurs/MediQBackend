@@ -1,0 +1,222 @@
+Great! Since you're using Node.js with Mongoose and MongoDB, you can adapt the previous structure to fit the NoSQL database model. MongoDB is well-suited for handling flexible data structures, and Mongoose makes it easier to define and interact with schemas in MongoDB.
+
+Key Adjustments for Multiple Store Owners
+If you want to support multiple store owners, you'll need to introduce a multi-tenancy model where each store has its own data (medicines, orders, inventory, etc.), but all the store data is stored in the same database.
+
+You can achieve this by including a store identifier (i.e., store_id) in each relevant collection, and ensuring each store owner can only access their data.
+
+1. Database Schema Design
+Here’s how you can adjust your MongoDB schema for multiple store owners:
+
+Store Schema
+Store: This collection will store the details of each store and associate it with a specific owner.
+js
+Copy code
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const storeSchema = new Schema({
+  owner_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Linking to the owner (User model)
+  store_name: { type: String, required: true },
+  store_address: { type: String, required: true },
+  contact_number: { type: String },
+  created_at: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('Store', storeSchema);
+owner_id: Each store will be linked to a specific owner via owner_id.
+store_name, store_address, contact_number: Details of the store.
+User Schema (for Store Owners)
+User: This will store the details of store owners and staff.
+js
+Copy code
+const userSchema = new Schema({
+  username: { type: String, unique: true, required: true },
+  email: { type: String, unique: true, required: true },
+  password: { type: String, required: true }, // Store hashed password
+  role: { type: String, enum: ['admin', 'staff'], default: 'admin' },
+  created_at: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('User', userSchema);
+username, email, password: Credentials for store owners.
+role: Whether the user is an admin (owner) or staff member.
+Medicine Schema (linked to Store)
+Each store can have its own inventory of medicines, so we will include the store_id here.
+
+js
+Copy code
+const medicineSchema = new Schema({
+  store_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Store', required: true },
+  name: { type: String, required: true },
+  description: { type: String },
+  category: { type: String },
+  price: { type: Number, required: true },
+  quantity_in_stock: { type: Number, required: true },
+  supplier: { type: String },
+  expiry_date: { type: Date }
+});
+
+module.exports = mongoose.model('Medicine', medicineSchema);
+store_id: Links each medicine to a specific store. This ensures that each store has its own set of medicines.
+Order Schema (linked to Store and Customer)
+Each order belongs to a store and a customer.
+
+js
+Copy code
+const orderSchema = new Schema({
+  store_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Store', required: true },
+  customer_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
+  order_date: { type: Date, default: Date.now },
+  total_amount: { type: Number, required: true },
+  status: { type: String, enum: ['pending', 'completed', 'canceled'], default: 'pending' },
+  payment_status: { type: String, enum: ['paid', 'unpaid'], default: 'unpaid' },
+  payment_method: { type: String, enum: ['cash', 'credit card'], required: true }
+});
+
+module.exports = mongoose.model('Order', orderSchema);
+store_id: Links each order to a specific store.
+Order Items Schema (linked to Orders and Medicines)
+js
+Copy code
+const orderItemSchema = new Schema({
+  order_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
+  medicine_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine', required: true },
+  quantity: { type: Number, required: true },
+  price_per_unit: { type: Number, required: true },
+  total_price: { type: Number, required: true }
+});
+
+module.exports = mongoose.model('OrderItem', orderItemSchema);
+medicine_id: References the medicine in the order.
+order_id: Links each item to an order.
+Inventory Log Schema
+js
+Copy code
+const inventoryLogSchema = new Schema({
+  store_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Store', required: true },
+  medicine_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine', required: true },
+  change_quantity: { type: Number, required: true }, // Can be positive or negative
+  action_type: { type: String, enum: ['purchase', 'sale', 'return'], required: true },
+  action_date: { type: Date, default: Date.now },
+  notes: { type: String }
+});
+
+module.exports = mongoose.model('InventoryLog', inventoryLogSchema);
+store_id: Links inventory changes to a specific store.
+2. Backend Design (Node.js + Mongoose)
+Folder Structure
+plaintext
+Copy code
+medicine-store-backend/
+├── controllers/
+│   ├── authController.js
+│   ├── storeController.js
+│   ├── medicineController.js
+│   ├── orderController.js
+│   ├── customerController.js
+│   └── inventoryController.js
+├── models/
+│   ├── storeModel.js
+│   ├── userModel.js
+│   ├── medicineModel.js
+│   ├── orderModel.js
+│   ├── orderItemModel.js
+│   ├── customerModel.js
+│   └── inventoryLogModel.js
+├── routes/
+│   ├── authRoutes.js
+│   ├── storeRoutes.js
+│   ├── medicineRoutes.js
+│   ├── orderRoutes.js
+│   └── customerRoutes.js
+├── middleware/
+│   └── authMiddleware.js
+├── config/
+│   └── db.js
+└── server.js
+Controllers and Routes
+You will need to create controllers for each resource, such as users, stores, medicines, orders, and inventory. Here's an example of how to implement the Store Controller:
+
+js
+Copy code
+// controllers/storeController.js
+const Store = require('../models/storeModel');
+const User = require('../models/userModel');
+
+const createStore = async (req, res) => {
+  try {
+    const { store_name, store_address, contact_number } = req.body;
+    const owner = req.user; // Current logged-in user (store owner)
+
+    const store = new Store({
+      owner_id: owner._id,
+      store_name,
+      store_address,
+      contact_number
+    });
+
+    await store.save();
+    res.status(201).json(store);
+  } catch (err) {
+    res.status(500).json({ message: 'Error creating store', error: err });
+  }
+};
+
+// Example for getting all stores of the logged-in user
+const getStores = async (req, res) => {
+  try {
+    const stores = await Store.find({ owner_id: req.user._id });
+    res.status(200).json(stores);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching stores', error: err });
+  }
+};
+
+module.exports = { createStore, getStores };
+Routes Example:
+
+js
+Copy code
+// routes/storeRoutes.js
+const express = require('express');
+const { createStore, getStores } = require('../controllers/storeController');
+const authMiddleware = require('../middleware/authMiddleware');
+
+const router = express.Router();
+
+router.post('/', authMiddleware, createStore);
+router.get('/', authMiddleware, getStores);
+
+module.exports = router;
+Authentication Middleware
+For multi-tenancy, you need to ensure that only authenticated store owners can access their stores. This can be achieved with JWT (JSON Web Tokens):
+
+js
+Copy code
+// middleware/authMiddleware.js
+const jwt = require('jsonwebtoken');
+const User = require('../models/userModel');
+
+const authMiddleware = async (req, res, next) => {
+  try {
+    const token = req.header('Authorization').replace('Bearer ', '');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    req.user = user; // Attaching user to the request object
+    next();
+  } catch (err) {
+    res.status(401).json({ message: 'Not authorized', error: err });
+  }
+};
+
+module.exports = authMiddleware;
+3. JWT Authentication
+For authentication, when a store owner logs in, you will generate a JWT token and include it in the response.
+
+Example of JWT token generation

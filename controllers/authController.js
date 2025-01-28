@@ -4,22 +4,23 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 const register = asyncHandler(async (req, res) => {
-    const { username, email, password, profile } = req.body;
+    const { name, email, gender, password, phone } = req.body;
     const hashedPassword = bcrypt.hashSync(password, 10);
-    const user = await User.create({
-        username,
+    const user = new User({
+        name,
         email,
+        gender,
         passwordHash: hashedPassword,
-        profile
+        phone
     });
-    if (user) {
+    const check = await user.save();
+    if (check) {
         res.status(201).json({
             message: `User Created ${user._id}`,
         });
     } else {
-        res.status(400).json({
-            message: 'Invalid User Data',
-        });
+        res.status(404);
+        throw new Error('User Not Found');
     }
 });
 
@@ -28,7 +29,7 @@ const login = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email });
     if (user && bcrypt.compareSync(password, user.passwordHash)) {
         const token = jwt.sign(
-            { id: user._id, username: user.username },
+            { id: user._id, username: user.username ,type: user.type},
             process.env.JWT_SECRET,
             {
                 expiresIn: '1d',
@@ -39,9 +40,8 @@ const login = asyncHandler(async (req, res) => {
             token,
         });
     } else {
-        res.status(400).json({
-            message: 'Invalid Email or Password',
-        });
+        res.status(400);
+        throw new Error('Invalid Credentials');
     }
 });
 

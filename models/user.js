@@ -1,17 +1,12 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  gender: { type: String, enum: ['male', 'female', 'other'], required: true },
   passwordHash: { type: String, required: true },
-  profile: {
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    dateOfBirth: { type: Date, required: true },
-    gender: { type: String, enum: ['male', 'female', 'other'], required: true }
-  },
-  createdAt: { type: Date, default: Date.now , Lock: true},
-  updatedAt: { type: Date, default: Date.now }
-});
+  phone: { type: Number, required: true },
+  role: { type: String, enum: ['admin', 'store-owner', 'customer'],default: 'customer'}, // Role-based access
+}, { timestamps: true ,strict: false});
 
 export const User = mongoose.model('User', userSchema);
