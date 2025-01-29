@@ -7,8 +7,8 @@ import asyncHandler from 'express-async-handler';
 export const createinventoryAuth = asyncHandler(async (req, res) => {
   const {medicine, quantity, expiryDate, order } = req.body;
 
-  const inventory = new inventory({ store: req.user.store_id, medicine, quantity, expiryDate, order });
-  const savedinventory = await inventory.save();
+  const data = new inventory({ store: req.user.store_id, medicine, quantity, expiryDate, order });
+  const savedinventory = await data.save();
 
   res.status(201).json(savedinventory);
 });
@@ -18,8 +18,8 @@ export const createinventoryAuth = asyncHandler(async (req, res) => {
 // @route   GET /api/inventory
 // @access  Private
 export const getinventoryAuth = asyncHandler(async (req, res) => {
-  const inventory = await inventory.find({ store: req.user.store_id }).populate('medicine');
-  res.status(200).json(inventory);
+  const data = await inventory.find({ store: req.user.store_id }).populate('medicine');
+  res.status(200).json(data);
 });
 
 // Auth update inventory
@@ -50,16 +50,16 @@ export const deleteinventoryAuth = asyncHandler(async (req, res) => {
 export const createinventory = asyncHandler(async (req, res) => {
   const { store, medicine, quantity, expiryDate, order } = req.body;
 
-  const inventory = new inventory({ store, medicine, quantity, expiryDate, order });
-  const savedinventory = await inventory.save();
+  const data = new inventory({ store, medicine, quantity, expiryDate, order });
+  const savedinventory = await data.save();
 
   res.status(201).json(savedinventory);
 });
 
 // Get all inventory items
 export const getinventory = asyncHandler(async (req, res) => {
-  const inventory = await inventory.find().populate('store medicine order');
-  res.status(200).json(inventory);
+  const data = await inventory.find().populate('store medicine order');
+  res.status(200).json(data);
 });
 
 // Update an inventory item

@@ -1,5 +1,27 @@
 import asyncHandler from 'express-async-handler';
-import Address from '../models/address.js';
+import {Address} from '../models/address.js';
+
+// Get address by Auth
+export const getAddressAuth = asyncHandler(async (req, res) => {
+  const address = await Address.findById(req.user.address);
+  res.status(200).json(address);
+});
+
+//update address by Auth
+export const updateAddressAuth = asyncHandler(async (req, res) => {
+  const { id } = req.user.address;
+  const updatedData = req.body;
+
+  const updatedAddress = await Address.findByIdAndUpdate(id, updatedData, { new: true }); 
+  res.status(200).json(updatedAddress);
+});
+
+//Get address by filter
+export const getAddress = asyncHandler(async (req, res) => {
+  const filter = req.query;
+  const address = await Address.find(filter);
+  res.status(200).json(address);
+});
 
 // Create a new address
 export const createAddress = asyncHandler(async (req, res) => {

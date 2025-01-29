@@ -90,3 +90,47 @@ sample data
 
 searching all meds = 'localhost:3000/medicine/ (get)
 
+inventory by auth = localhost:3000/inventory/ (post)
+{
+    "medicine":"679a489bfa8a3f1c09a22074",
+    "quantity":50,
+    "expiryDate":"2025-06-25"
+}
+inventory by auth = localhost:3000/inventory/ (get)
+
+update inventory by auth = localhost:3000/inventory/:id (put)
+{
+    "quantity":59,
+    "expiryDate":"2025-06-30"
+}
+
+
+
+Orders update inventory auth = localhost:3000/order/ (post)
+
+{
+    "seller": "John Doe",
+    "medicines": [
+        {
+            "medicine_id": "679a489bfa8a3f1c09a22074", // Paracetamol
+            "quantity": 40,
+            "expiry": "2023-12-31",
+            "price": 5.99,
+            "type": "renew"
+        },
+        {
+            "medicine_id": "679a49ebfeec1cf53c034e41", // Ibuprofen
+            "quantity": 54,
+            "expiry": "2024-06-30",
+            "price": 7.99,
+            "type": "renew"
+        }
+    ],
+    "totalItems": 2,
+    "orderDate": "2023-01-01",
+    "remarks": "Urgent delivery"
+}
+
+get orders auth localhost:3000/order/ (get) done
+
+done

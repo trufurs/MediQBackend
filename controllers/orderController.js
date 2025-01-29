@@ -1,39 +1,96 @@
 import asyncHandler from 'express-async-handler';
-import Order from '../models/Order.js';
+import {Order} from '../models/orders.js';
 import mongoose from 'mongoose';
 import { inventory } from '../models/inventory.js';
 
-// Create a new order
-export const addOrder = asyncHandler(async (req, res) => {
-  const { store, seller, medicines, totalItems, status } = req.body;
-  const session = mongoose.startSession();
-  session.startSession();
-  try {
-    const order = new Order({ store, seller, medicines, totalItems, status });
-    const savedOrder = await order.save();
+//auth create order
+export const createOrderAuth = asyncHandler(async (req, res) => {
+  const { seller, medicines, totalItems, status } = req.body;
 
-    medicines.forEach(async (data) => {
-      const { medicine_id, quantity, expiary, type} = data;
-      if(type === 'new'){
-        const inventory = new Inventory({ store, medicine_id, quantity, expiryDate, order });
-        await inventory.save();
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const order = new Order({ store: req.user.store_id, seller, medicines, totalItems, status });
+    const savedOrder = await order.save({ session });
+
+    for (const data of medicines) {
+      const { medicine_id, quantity, expiry, type } = data;
+
+      if (type === 'new') {
+        const inventoryData = new inventory({ store: req.user.store_id, medicine:medicine_id, quantity, expiryDate:expiry, order: savedOrder._id });
+        await inventoryData.save({ session });
       } else {
-        const updateInventory = await inventory.findOneAndUpdate(
-          {store, medicine_id},
-          { quantity: quantity , expiryDate: expiary }, 
-          { new: true });  
+        await inventory.findOneAndUpdate(
+          { store: req.user.store_id, medicine:medicine_id },
+          { quantity, expiryDate :expiry },
+          { new: true, session }
+        );
       }
-    });
+    }
+
     await session.commitTransaction();
     session.endSession();
+
+    res.status(201).json(savedOrder);
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    res.status(400);
-    throw new Error('Invalid request data', err);
+    res.status(400).json({ error: err.message });
   }
-  res.status(201).json(savedOrder);
 });
+
+// Auth get orders
+export const getOrdersAuth = asyncHandler(async (req, res) => {
+  const orders = await Order.find({ store: req.user.store_id }).populate('medicines.medicine_id');
+  res.status(200).json(orders);
+});
+
+
+// Dev commands
+// Create a new order
+export const addOrder = asyncHandler(async (req, res) => {
+  const { store, seller, medicines, totalItems, status } = req.body;
+  
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  
+  try {
+    const order = new Order({ store, seller, medicines, totalItems, status });
+    const savedOrder = await order.save({ session });
+
+    for (const data of medicines) {
+      const { medicine_id, quantity, expiry, type } = data;
+
+      if (type === 'new') {
+        const inventory = new Inventory({
+          store,
+          medicine_id,
+          quantity,
+          expiryDate: expiry, // Ensure consistent naming
+          order: savedOrder._id, // Reference order ID
+        });
+        await inventory.save({ session });
+      } else {
+        await Inventory.findOneAndUpdate(
+          { store, medicine_id },
+          { $inc: { quantity: quantity }, expiryDate: expiry },
+          { new: true, session }
+        );
+      }
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return res.status(201).json(savedOrder);
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    return res.status(400).json({ error: err.message });
+  }
+});
+
 
 // Get all orders
 export const getOrders = asyncHandler(async (req, res) => {

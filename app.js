@@ -5,6 +5,8 @@ import userRoutes from './routes/userRoutes.js'
 import medicineRoutes from './routes/medicineRoutes.js';
 import requestRoutes from './routes/requestRoutes.js';
 import inventoryRoutes from './routes/inventoryRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import addressRoutes from './routes/addressRoutes.js';
 
 const app = express();
 import{run} from './config/moongose.js';
@@ -16,6 +18,8 @@ app.use('/user', userRoutes);
 app.use("/medicine",medicineRoutes);
 app.use('/request',requestRoutes);
 app.use('/inventory',inventoryRoutes);
+app.use('/order',orderRoutes);
+app.use('/address',addressRoutes);
 app.use(errorHandler);
 
 app.listen(3000,()=>{
