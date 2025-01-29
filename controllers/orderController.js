@@ -1,13 +1,37 @@
 import asyncHandler from 'express-async-handler';
 import Order from '../models/Order.js';
+import mongoose from 'mongoose';
+import { inventory } from '../models/inventory.js';
 
 // Create a new order
-export const createOrder = asyncHandler(async (req, res) => {
+export const addOrder = asyncHandler(async (req, res) => {
   const { store, seller, medicines, totalItems, status } = req.body;
+  const session = mongoose.startSession();
+  session.startSession();
+  try {
+    const order = new Order({ store, seller, medicines, totalItems, status });
+    const savedOrder = await order.save();
 
-  const order = new Order({ store, seller, medicines, totalItems, status });
-  const savedOrder = await order.save();
-
+    medicines.forEach(async (data) => {
+      const { medicine_id, quantity, expiary, type} = data;
+      if(type === 'new'){
+        const inventory = new Inventory({ store, medicine_id, quantity, expiryDate, order });
+        await inventory.save();
+      } else {
+        const updateInventory = await inventory.findOneAndUpdate(
+          {store, medicine_id},
+          { quantity: quantity , expiryDate: expiary }, 
+          { new: true });  
+      }
+    });
+    await session.commitTransaction();
+    session.endSession();
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    res.status(400);
+    throw new Error('Invalid request data', err);
+  }
   res.status(201).json(savedOrder);
 });
 

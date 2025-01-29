@@ -5,7 +5,12 @@ import bcrypt from 'bcrypt';
 
 const register = asyncHandler(async (req, res) => {
     const { name, email, gender, password, phone } = req.body;
+    if (!name || !email || !gender || !password || !phone) {
+        console.log(req.body);
+        throw new Error('SyntaxError');
+    }
     const hashedPassword = bcrypt.hashSync(password, 10);
+    
     const user = new User({
         name,
         email,
@@ -19,8 +24,8 @@ const register = asyncHandler(async (req, res) => {
             message: `User Created ${user._id}`,
         });
     } else {
-        res.status(404);
-        throw new Error('User Not Found');
+
+        throw new Error('MongoError');
     }
 });
 
@@ -29,10 +34,10 @@ const login = asyncHandler(async (req, res) => {
     const user = await User.findOne({ email });
     if (user && bcrypt.compareSync(password, user.passwordHash)) {
         const token = jwt.sign(
-            { id: user._id, username: user.username ,type: user.type},
+            { id: user._id, name: user.name ,role: user.role, store_id: user.store_id},
             process.env.JWT_SECRET,
             {
-                expiresIn: '1d',
+                expiresIn: '30d',
             }
         );
         res.status(200).json({
@@ -40,8 +45,7 @@ const login = asyncHandler(async (req, res) => {
             token,
         });
     } else {
-        res.status(400);
-        throw new Error('Invalid Credentials');
+        throw new Error('ValidationError');
     }
 });
 

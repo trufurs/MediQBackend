@@ -1,11 +1,11 @@
  import { Schema, model } from 'mongoose';
 
  const inventorySchema = new Schema({
-    store: { type: mongoose.Schema.Types.ObjectId, ref: 'Store', required: true },
-    medicine: { type: mongoose.Schema.Types.ObjectId, ref: 'Medicine', required: true },
+    store: { type: Schema.Types.ObjectId, ref: 'Store', required: true },
+    medicine: { type: Schema.Types.ObjectId, ref: 'Medicine', required: true },
     quantity: { type: Number, required: true },
     expiryDate: { type: Date, required: true },
-    order: { type: mongoose.Schema.Types.ObjectId, ref: 'Order' },
+    order: { type: Schema.Types.ObjectId, ref: 'Order' },
   }, { timestamps: true });
   
 

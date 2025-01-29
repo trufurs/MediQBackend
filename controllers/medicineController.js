@@ -1,4 +1,4 @@
-import  {Medication}  from '../models/mediciene.js';
+import  {Medication}  from '../models/medicine.js';
 import asyncHandler from 'express-async-handler';
 
 // @desc    Create a new medicine
@@ -132,5 +132,3 @@ const deleteMediciene = asyncHandler(async (res , req) => {
         res.status(404).json({message: 'Mediciene not found'});
     }
 }); */
-
-export {getMediciene, getMedicieneById, createMediciene, updateMediciene, deleteMediciene};

@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   phone: { type: Number, required: true },
   role: { type: String, enum: ['admin', 'store-owner', 'customer'],default: 'customer'}, // Role-based access
+  store_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Store',required: false },
 }, { timestamps: true ,strict: false});
 
 export const User = mongoose.model('User', userSchema);

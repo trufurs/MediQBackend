@@ -1,36 +1,80 @@
-import  {Inventory}  from '../models/inventory.js';
+import  {inventory}  from '../models/inventory.js';
 import asyncHandler from 'express-async-handler';
+// Auth create inventory
+// @desc    Create a new inventory item
+// @route   POST /api/inventory
+// @access  Private
+export const createinventoryAuth = asyncHandler(async (req, res) => {
+  const {medicine, quantity, expiryDate, order } = req.body;
 
+  const inventory = new inventory({ store: req.user.store_id, medicine, quantity, expiryDate, order });
+  const savedinventory = await inventory.save();
 
+  res.status(201).json(savedinventory);
+});
+
+// Auth get inventory
+// @desc    Get all inventory items
+// @route   GET /api/inventory
+// @access  Private
+export const getinventoryAuth = asyncHandler(async (req, res) => {
+  const inventory = await inventory.find({ store: req.user.store_id }).populate('medicine');
+  res.status(200).json(inventory);
+});
+
+// Auth update inventory
+// @desc    Update an inventory item
+// @route   PUT /api/inventory/:id
+// @access  Private
+export const updateinventoryAuth = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const updatedData = req.body;
+
+  const updatedinventory = await inventory.findByIdAndUpdate(id, updatedData, { new: true });
+  res.status(200).json(updatedinventory);
+});
+
+// Auth delete inventory
+// @desc    Delete an inventory item
+// @route   DELETE /api/inventory/:id
+// @access  Private
+export const deleteinventoryAuth = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  await inventory.findByIdAndDelete(id);
+  res.status(204).send();
+});
+
+// Dev commands
 // Create a new inventory item
-export const createInventory = asyncHandler(async (req, res) => {
+export const createinventory = asyncHandler(async (req, res) => {
   const { store, medicine, quantity, expiryDate, order } = req.body;
 
-  const inventory = new Inventory({ store, medicine, quantity, expiryDate, order });
-  const savedInventory = await inventory.save();
+  const inventory = new inventory({ store, medicine, quantity, expiryDate, order });
+  const savedinventory = await inventory.save();
 
-  res.status(201).json(savedInventory);
+  res.status(201).json(savedinventory);
 });
 
 // Get all inventory items
-export const getInventory = asyncHandler(async (req, res) => {
-  const inventory = await Inventory.find().populate('store medicine order');
+export const getinventory = asyncHandler(async (req, res) => {
+  const inventory = await inventory.find().populate('store medicine order');
   res.status(200).json(inventory);
 });
 
 // Update an inventory item
-export const updateInventory = asyncHandler(async (req, res) => {
+export const updateinventory = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const updatedData = req.body;
 
-  const updatedInventory = await Inventory.findByIdAndUpdate(id, updatedData, { new: true });
-  res.status(200).json(updatedInventory);
+  const updatedinventory = await inventory.findByIdAndUpdate(id, updatedData, { new: true });
+  res.status(200).json(updatedinventory);
 });
 
 // Delete an inventory item
-export const deleteInventory = asyncHandler(async (req, res) => {
+export const deleteinventory = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  await Inventory.findByIdAndDelete(id);
+  await inventory.findByIdAndDelete(id);
   res.status(204).send();
 });

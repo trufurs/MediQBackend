@@ -1,15 +1,21 @@
 import express from 'express';
-import router from './routes/userLoginRoutes.js';
+import auth from './routes/userLoginRoutes.js';
 import { errorHandler } from './middleware/errorhandler.js';
+import userRoutes from './routes/userRoutes.js'
+import medicineRoutes from './routes/medicineRoutes.js';
+import requestRoutes from './routes/requestRoutes.js';
+import inventoryRoutes from './routes/inventoryRoutes.js';
 
 const app = express();
 import{run} from './config/moongose.js';
 
 run();
 app.use(express.json());
-//app.use('/medications', (await import('./routes/medicieneRoutes.js')).default);
-app.use('/auth',router);
-app.use('/store', (await import('./routes/storeRoutes.js')).default);
+app.use('/auth',auth);
+app.use('/user', userRoutes);
+app.use("/medicine",medicineRoutes);
+app.use('/request',requestRoutes);
+app.use('/inventory',inventoryRoutes);
 app.use(errorHandler);
 
 app.listen(3000,()=>{

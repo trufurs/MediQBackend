@@ -1,8 +1,32 @@
-import {User} from '../models/userModel.js';
+import {User} from '../models/user.js';
 import asyncHandler from 'express-async-handler';
 
+// auth Get user profile
+const getUserProfile = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user.id);
+  user.passwordHash = undefined;
+  res.status(200).json(user);
+});
+
+// auth Update user profile
+const updateUserProfile = asyncHandler(async (req, res) => {
+  if(!req.body.name || !req.body.email || !req.body.gender || !req.body.phone){
+    throw new Error('BadRequestError');
+  }
+  const user = await User.findByIdAndUpdate(req.user.id ,{
+    name: req.body.name,
+    email: req.body.email,
+    gender: req.body.gender,
+    phone: req.body.phone
+  },{new:true});
+  res.status(200).json(user);
+});
+
+export { getUserProfile, updateUserProfile };
+
+// Dev controller to create a user
 // Create a new user
-export const createUser = asyncHandler(async (req, res) => {
+const createUser = asyncHandler(async (req, res) => {
   const { name, email, gender, passwordHash, phone, role } = req.body;
 
   const user = new User({ name, email, gender, passwordHash, phone, role });
@@ -12,13 +36,24 @@ export const createUser = asyncHandler(async (req, res) => {
 });
 
 // Get all users
-export const getUsers = asyncHandler(async (req, res) => {
+const getUsers = asyncHandler(async (req, res) => {
   const users = await User.find();
   res.status(200).json(users);
 });
 
+// Get a user
+const getUser = asyncHandler(async (req, res) => {
+  const id = req.params.id;
+  try {
+    const user = await User.findById(id);
+    res.status(200).json(user);
+  } catch (error) {
+    throw new Error('NotFoundError');
+  }
+});
+
 // Update a user
-export const updateUser = asyncHandler(async (req, res) => {
+const updateUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const updatedData = req.body;
 
@@ -27,9 +62,11 @@ export const updateUser = asyncHandler(async (req, res) => {
 });
 
 // Delete a user
-export const deleteUser = asyncHandler(async (req, res) => {
+const deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   await User.findByIdAndDelete(id);
   res.status(204).send();
 });
+
+export {createUser, getUser, getUsers, updateUser, deleteUser };

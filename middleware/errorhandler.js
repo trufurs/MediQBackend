@@ -1,17 +1,28 @@
-import { ValidationError } from 'mongoose';
-
 export const errorHandler = (err, req, res, next) => {
-    console.error(err); // Log the error for debugging purposes
+    console.log(err.stack); // Log the error for debugging purposes
 
     let statusCode = 500; // Default to internal server error
     let errorResponse = {
-        title: 'Error',
+        title: err.title ||'Error',
         code: err.code || 'UNKNOWN_ERROR',
         message: err.message || 'Something went wrong',
-        details: err.errors || null
+        StakeTrace: err.stack || "null"
     };
+    console.log(err.name);
+    if(err.name == 'MongoServerError'){
+        errorResponse.message = 'MongoError';
+    }
+    else if(err.name == 'MongooseError'){
+        errorResponse.message = 'MongooseError';
+    }
 
-    switch (err.name) {
+
+    switch (errorResponse.message) {
+        case 'MongooseError':
+            statusCode = 400;
+            errorResponse.title = 'Mongoose Error';
+            errorResponse.message = 'Database Not Connected';
+            break;
         case 'NotFoundError':
             statusCode = 404;
             errorResponse.title = 'Not Found';
@@ -22,6 +33,11 @@ export const errorHandler = (err, req, res, next) => {
                 errorResponse.title = 'Duplicate Key Error';
                 errorResponse.message = 'Duplicate key error';
             }
+            break;
+        case 'BadRequestError':
+            statusCode = 400;
+            errorResponse.title = 'Bad Request';
+            errorResponse.message = 'Bad request';
             break;
         case 'JsonWebTokenError':
             statusCode = 401;
@@ -75,6 +91,7 @@ export const errorHandler = (err, req, res, next) => {
             errorResponse.message = 'Something went wrong';
             break;
     }
+    errorResponse.code = statusCode;
 
     res.status(statusCode).json(errorResponse);
 };

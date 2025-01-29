@@ -1,0 +1,92 @@
+register = localhost:3000/auth/register/
+{
+    "name":"store-owner",
+    "email":"store@mediq.com",
+    "password":"store",
+    "gender":"female",
+    "phone":9136472253
+}
+
+{
+    "name":"customer",
+    "email":"isht@mediq.com",
+    "password":"isht",
+    "gender":"male",
+    "phone":9999299992
+}
+
+login = localhost:3000/auth/login/
+{
+    "email" : "admin@mediq.com",
+    "password" :"admin"
+}
+
+gets auth user details = localhost:3000/user/
+
+admin auth =  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OTc1MWYzNmFiOWNlMTg2YWJiZjg2NCIsIm5hbWUiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTczODA5OTMwOCwiZXhwIjoxNzQwNjkxMzA4fQ.iyBexFn3SwyCnlSyX1JQpit1rOisVM5aG2gst8KXjF8
+
+store auth = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OTlmOTYwZTMzZGJhOTE3MmIwM2ViMiIsIm5hbWUiOiJzdG9yZS1vd25lciIsInJvbGUiOiJzdG9yZS1vd25lciIsInN0b3JlX2lkIjoiNjc5YTQxNGIxODIxOGVmYTdlMzliOWQxIiwiaWF0IjoxNzM4MTY0MzYwLCJleHAiOjE3NDA3NTYzNjB9.ACarnd2qhjlLdSwME91jI95oIz4zWOTNgOFj9dE3gM0
+
+cutomer auth now = 
+
+request = localhost:3000/request/
+{
+    "owner": "6799f960e33dba9172b03eb2",
+    "name": "Pharmacy Name",
+    "licenseNumber": "ABC123",
+    "contact": "123-456-7890",
+    "address": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "street": "123 Main St",
+        "city": "San Francisco",
+        "state": "CA",
+        "postalCode": "94103",
+        "country": "USA"
+    }
+}
+
+result =
+{
+    "owner": "6799f960e33dba9172b03eb2",
+    "name": "Pharmacy Name",
+    "licenseNumber": "ABC123",
+    "contact": "123-456-7890",
+    "address": {
+        "latitude": 37.7749,
+        "longitude": -122.4194,
+        "street": "123 Main St",
+        "city": "San Francisco",
+        "state": "CA",
+        "postalCode": "94103",
+        "country": "USA"
+    },
+    "status": "pending",
+    "_id": "6799fc19e33dba9172b03eb6",
+    "createdAt": "2025-01-29T09:59:53.074Z",
+    "updatedAt": "2025-01-29T09:59:53.074Z",
+    "__v": 0
+}
+
+now admin accepts
+with his tocken he has options [rejected,verified,]
+
+{
+    status:"verified"
+}
+
+adding medicine = localhost:3000/medicine/ (post)
+{
+    "name": "Paracetamol",
+    "composition": "Acetaminophen 500mg",
+    "manufacturer": "Pharma Inc.",
+    "usage": "Pain relief and fever reduction",
+    "precautions": "Do not exceed the recommended dose. Consult a doctor if symptoms persist."
+}
+sample data
+"Paracetamol"  "_id": "679a489bfa8a3f1c09a22074",
+"Ibuprofen"  "_id: 679a49ebfeec1cf53c034e41",
+"Amoxicillin"  "_id": "679a49f5feec1cf53c034e43",
+
+searching all meds = 'localhost:3000/medicine/ (get)
+
