@@ -30,7 +30,7 @@ export const updateinventoryAuth = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const updatedData = req.body;
 
-  const updatedinventory = await inventory.findByIdAndUpdate(id, updatedData, { new: true });
+  const updatedinventory = await inventory.findByIdAndUpdate({_id:id , store:req.user.store_id}, updatedData, { new: true });
   res.status(200).json(updatedinventory);
 });
 
@@ -40,7 +40,6 @@ export const updateinventoryAuth = asyncHandler(async (req, res) => {
 // @access  Private
 export const deleteinventoryAuth = asyncHandler(async (req, res) => {
   const { id } = req.params;
-
   await inventory.findByIdAndDelete(id);
   res.status(204).send();
 });

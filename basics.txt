@@ -133,4 +133,154 @@ Orders update inventory auth = localhost:3000/order/ (post)
 
 get orders auth localhost:3000/order/ (get) done
 
+[
+    {
+        "_id": "679a79044dd1f92ff0648959",
+        "store": "679a414b18218efa7e39b9d1",
+        "seller": "John Doe",
+        "medicines": [
+            {
+                "medicine_id": {
+                    "_id": "679a489bfa8a3f1c09a22074",
+                    "name": "Paracetamol",
+                    "composition": "Acetaminophen 500mg",
+                    "manufacturer": "Pharma Inc.",
+                    "usage": "Pain relief and fever reduction",
+                    "precautions": "Do not exceed the recommended dose. Consult a doctor if symptoms persist.",
+                    "createdAt": "2025-01-29T15:26:19.566Z",
+                    "updatedAt": "2025-01-29T15:26:19.566Z",
+                    "__v": 0
+                },
+                "quantity": 10,
+                "expiry": "2023-12-31T00:00:00.000Z",
+                "price": 5.99,
+                "type": "renew",
+                "_id": "679a79044dd1f92ff064895a"
+            },
+            {
+                "medicine_id": {
+                    "_id": "679a49ebfeec1cf53c034e41",
+                    "name": "Ibuprofen",
+                    "composition": "Ibuprofen 200mg",
+                    "manufacturer": "HealthCorp",
+                    "usage": "Pain relief and anti-inflammatory",
+                    "precautions": "Take with food to avoid stomach upset. Consult a doctor if symptoms persist.",
+                    "createdAt": "2025-01-29T15:31:55.862Z",
+                    "updatedAt": "2025-01-29T15:31:55.862Z",
+                    "__v": 0
+                },
+                "quantity": 5,
+                "expiry": "2024-06-30T00:00:00.000Z",
+                "price": 7.99,
+                "type": "new",
+                "_id": "679a79044dd1f92ff064895b"
+            }
+        ],
+        "totalItems": 2,
+        "status": "pending",
+        "orderDate": "2025-01-29T18:52:52.877Z",
+        "createdAt": "2025-01-29T18:52:52.882Z",
+        "updatedAt": "2025-01-29T18:52:52.882Z",
+        "__v": 0
+    },
+    {
+        "_id": "679a7f284dd1f92ff0648960",
+        "store": "679a414b18218efa7e39b9d1",
+        "seller": "John Doe",
+        "medicines": [
+            {
+                "medicine_id": {
+                    "_id": "679a489bfa8a3f1c09a22074",
+                    "name": "Paracetamol",
+                    "composition": "Acetaminophen 500mg",
+                    "manufacturer": "Pharma Inc.",
+                    "usage": "Pain relief and fever reduction",
+                    "precautions": "Do not exceed the recommended dose. Consult a doctor if symptoms persist.",
+                    "createdAt": "2025-01-29T15:26:19.566Z",
+                    "updatedAt": "2025-01-29T15:26:19.566Z",
+                    "__v": 0
+                },
+                "quantity": 40,
+                "expiry": "2023-12-31T00:00:00.000Z",
+                "price": 5.99,
+                "type": "renew",
+                "_id": "679a7f284dd1f92ff0648961"
+            },
+            {
+                "medicine_id": {
+                    "_id": "679a49ebfeec1cf53c034e41",
+                    "name": "Ibuprofen",
+                    "composition": "Ibuprofen 200mg",
+                    "manufacturer": "HealthCorp",
+                    "usage": "Pain relief and anti-inflammatory",
+                    "precautions": "Take with food to avoid stomach upset. Consult a doctor if symptoms persist.",
+                    "createdAt": "2025-01-29T15:31:55.862Z",
+                    "updatedAt": "2025-01-29T15:31:55.862Z",
+                    "__v": 0
+                },
+                "quantity": 54,
+                "expiry": "2024-06-30T00:00:00.000Z",
+                "price": 7.99,
+                "type": "renew",
+                "_id": "679a7f284dd1f92ff0648962"
+            }
+        ],
+        "totalItems": 2,
+        "status": "pending",
+        "orderDate": "2025-01-29T19:19:04.552Z",
+        "createdAt": "2025-01-29T19:19:04.554Z",
+        "updatedAt": "2025-01-29T19:19:04.554Z",
+        "__v": 0
+    },
+    {
+        "_id": "679a7fb3aa25f789c3be63e4",
+        "store": "679a414b18218efa7e39b9d1",
+        "seller": "John Doe",
+        "medicines": [
+            {
+                "medicine_id": {
+                    "_id": "679a489bfa8a3f1c09a22074",
+                    "name": "Paracetamol",
+                    "composition": "Acetaminophen 500mg",
+                    "manufacturer": "Pharma Inc.",
+                    "usage": "Pain relief and fever reduction",
+                    "precautions": "Do not exceed the recommended dose. Consult a doctor if symptoms persist.",
+                    "createdAt": "2025-01-29T15:26:19.566Z",
+                    "updatedAt": "2025-01-29T15:26:19.566Z",
+                    "__v": 0
+                },
+                "quantity": 40,
+                "expiry": "2023-12-31T00:00:00.000Z",
+                "price": 5.99,
+                "type": "renew",
+                "_id": "679a7fb3aa25f789c3be63e5"
+            },
+            {
+                "medicine_id": {
+                    "_id": "679a49ebfeec1cf53c034e41",
+                    "name": "Ibuprofen",
+                    "composition": "Ibuprofen 200mg",
+                    "manufacturer": "HealthCorp",
+                    "usage": "Pain relief and anti-inflammatory",
+                    "precautions": "Take with food to avoid stomach upset. Consult a doctor if symptoms persist.",
+                    "createdAt": "2025-01-29T15:31:55.862Z",
+                    "updatedAt": "2025-01-29T15:31:55.862Z",
+                    "__v": 0
+                },
+                "quantity": 54,
+                "expiry": "2024-06-30T00:00:00.000Z",
+                "price": 7.99,
+                "type": "renew",
+                "_id": "679a7fb3aa25f789c3be63e6"
+            }
+        ],
+        "totalItems": 2,
+        "status": "pending",
+        "orderDate": "2025-01-29T19:21:23.766Z",
+        "createdAt": "2025-01-29T19:21:23.775Z",
+        "updatedAt": "2025-01-29T19:21:23.775Z",
+        "__v": 0
+    }
+]
+
 done

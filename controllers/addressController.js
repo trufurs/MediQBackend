@@ -55,3 +55,37 @@ export const deleteAddress = asyncHandler(async (req, res) => {
   await Address.findByIdAndDelete(id);
   res.status(204).send();
 });
+
+export const getAddressByCity = asyncHandler(async (req, res) => {
+  const { city } = req.params;
+  await Address.find({ city: city }).populate('store')
+    .then((addresses) => {
+      if (addresses.length === 0) {
+        return res.status(200).json({ message: 'No places found' });
+      }
+      res.status(200).json(addresses);
+    })
+    .catch((error) => {
+      res.status(500).json({ message: 'Error retrieving addresses', error });
+    });
+});
+
+// get address nearby addresses latitude and longitude 
+
+export const getAddressByLatLong = asyncHandler(async (req, res) => {
+  const { latitude, longitude } = req.params;
+  const radius = 10; // Radius in kilometers
+
+  const addresses = await Address.find({
+    location: {
+      $geoWithin: {
+        $centerSphere: [[longitude, latitude], radius / 6378.1] // Convert radius to radians
+      }
+    }
+  });
+
+  if (addresses.length === 0) {
+    return res.status(200).json({ message: 'No places found' });
+  }
+    res.status(200).json(addresses);
+});

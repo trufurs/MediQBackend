@@ -9,8 +9,11 @@ import { compare } from 'bcrypt';
 
 // Create a new request
 const createRequest = asyncHandler(async (req, res) => {
-    const {owner , name , licenseNumber , contact , address } = req.body;
-    
+    var {owner , name , licenseNumber , contact , address } = req.body;
+    if (req.user.role !== 'admin') {
+        owner = req.user.id;
+        console.log(owner);
+    }
     const request = new Request({owner , name , licenseNumber , contact , address });
     const savedRequest = await request.save();
     
@@ -92,5 +95,16 @@ const updateRequest = asyncHandler(async (req, res) => {
   }
 });
 
+const getAuthRequest = asyncHandler(async (req, res) => {
+    const request = await Request.find({ owner: req.user._id });
 
-  export { createRequest, getRequests, updateRequest };
+    if (!request) {
+        res.status(200).json({ message: "none" });
+    }else {
+        const status = request.status;
+        res.status(200).json(status);
+    }
+}
+);
+
+  export { createRequest, getRequests, updateRequest ,getAuthRequest };

@@ -7,9 +7,18 @@ import requestRoutes from './routes/requestRoutes.js';
 import inventoryRoutes from './routes/inventoryRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import addressRoutes from './routes/addressRoutes.js';
+import cors from 'cors';
 
 const app = express();
 import{run} from './config/moongose.js';
+
+const corsOptions ={
+    origin:'http://localhost:4000', 
+    credentials:true,            //access-control-allow-credentials:true
+    optionSuccessStatus:200
+}
+
+app.use(cors(corsOptions));
 
 run();
 app.use(express.json());
@@ -21,6 +30,7 @@ app.use('/inventory',inventoryRoutes);
 app.use('/order',orderRoutes);
 app.use('/address',addressRoutes);
 app.use(errorHandler);
+
 
 app.listen(3000,()=>{
     console.log('Server is running on port 3000');
