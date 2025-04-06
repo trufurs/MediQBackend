@@ -13,11 +13,11 @@ const app = express();
 import{run} from './config/moongose.js';
 
 const corsOptions ={
-    origin:'http://localhost:4000', 
+    origin:process.env.url, 
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 }
-
+app.use(cros);
 app.use(cors(corsOptions));
 
 run();
