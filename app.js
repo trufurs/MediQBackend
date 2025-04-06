@@ -17,7 +17,7 @@ const corsOptions ={
     credentials:true,            //access-control-allow-credentials:true
     optionSuccessStatus:200
 }
-app.use(cros);
+
 app.use(cors(corsOptions));
 
 run();
