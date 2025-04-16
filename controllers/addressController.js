@@ -89,3 +89,34 @@ export const getAddressByLatLong = asyncHandler(async (req, res) => {
   }
     res.status(200).json(addresses);
 });
+
+export async function updateAllAddressesWithLocation() {
+  try {
+    const addresses = await Address.find({
+      location: { $exists: false } // only update those missing location
+    });
+
+    const bulkOps = addresses.map((doc) => ({
+      updateOne: {
+        filter: { _id: doc._id },
+        update: {
+          $set: {
+            location: {
+              type: 'Point',
+              coordinates: [doc.longitude, doc.latitude],
+            },
+          },
+        },
+      },
+    }));
+
+    if (bulkOps.length > 0) {
+      const result = await Address.bulkWrite(bulkOps);
+      console.log(`✅ Updated ${result.modifiedCount} addresses with location`);
+    } else {
+      console.log('✅ All addresses already have location');
+    }
+  } catch (error) {
+    console.error('❌ Error updating addresses:', error);
+  }
+}
