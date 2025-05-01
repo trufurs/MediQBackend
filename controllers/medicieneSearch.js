@@ -34,7 +34,7 @@ export const getMedsFromDatabase = async (query, limit, skip) => {
   const meds = await Medication.find({ name: { $regex: `.*${escapedQuery}.*`, $options: 'i' } })
     .skip(skip)
     .limit(limit);
-  return meds.map(med => ({ id: med._id.toString(), name: med.name, manufacturer: med.manufacturer }));
+  return meds.map(med => ({ id: med._id.toString(), name: med.name, manufacturer: med.manufacturer , composition: med.composition }));
 };
 
 // 🔵 Search OpenFDA
@@ -49,11 +49,13 @@ export const getMedsFromOpenFDA = async (query, limit, skip) => {
       },
     });
 
-    return response.data.results.map((item, index) => ({
+    return response.data.results
+      .filter(item => item.openfda?.brand_name?.[0] && item.openfda?.manufacturer_name?.[0])
+      .map((item, index) => ({
       id: `openfda-${item.id}`,
-      name: item.openfda?.brand_name?.[0] || 'Unknown',
-      manufacturer: item.openfda?.manufacturer_name?.[0] || 'OpenFDA~Unknown',
-    }));
+      name: item.openfda.brand_name[0],
+      manufacturer: item.openfda.manufacturer_name[0],
+      }));
   } catch (err) {
     console.error('OpenFDA API error:', err.message);
     return [];
@@ -78,7 +80,7 @@ export const getMedsFromIdDatabase = async (id) => {
   try {
     const med = await Medication.findById(id);
     if (!med) return null;
-    return { id: med._id.toString(), name: med.name, ...med.toObject() };
+    return { id: med._id.toString(), name: med.name, composition: med.composition, manufacturer: med.manufacturer,  usage: med.usage, precautions: med.precautions };
   } catch {
     return null;
   }
