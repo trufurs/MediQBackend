@@ -1,5 +1,4 @@
 export const errorHandler = (err, req, res, next) => {
-    console.log(err.stack); // Log the error for debugging purposes
 
     let statusCode = 500; // Default to internal server error
     let errorResponse = {
@@ -8,7 +7,6 @@ export const errorHandler = (err, req, res, next) => {
         message: err.message || 'Something went wrong',
         StakeTrace: err.stack || "null"
     };
-    console.log(err.name);
     if(err.name == 'MongoServerError'){
         errorResponse.message = 'MongoError';
     }

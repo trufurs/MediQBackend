@@ -18,8 +18,8 @@ const addressSchema = new Schema({
       default: 'Point'  // not required
     },
     coordinates: {
-      type: [Number],   // [longitude, latitude]
-      default: undefined  // so it's optional
+      type: [Number,Number],   // [longitude, latitude]
+      default: [0,0]  // so it's optional
     }
   }
 }, { timestamps: true });
