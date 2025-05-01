@@ -31,10 +31,21 @@ function escapeRegex(string) {
 
 export const getMedsFromDatabase = async (query, limit, skip) => {
   const escapedQuery = escapeRegex(query); // Escape the query
-  const meds = await Medication.find({ name: { $regex: `.*${escapedQuery}.*`, $options: 'i' } })
+  const meds = await Medication.find({
+    $or: [
+      { name: { $regex: `.*${escapedQuery}.*`, $options: 'i' } }, // Search in brand name
+      { composition: { $regex: `.*${escapedQuery}.*`, $options: 'i' } }, // Search in generic name
+    ],
+  })
     .skip(skip)
     .limit(limit);
-  return meds.map(med => ({ id: med._id.toString(), name: med.name, manufacturer: med.manufacturer , composition: med.composition }));
+
+  return meds.map(med => ({
+    id: med._id.toString(),
+    name: med.name,
+    manufacturer: med.manufacturer,
+    composition: med.composition,
+  }));
 };
 
 // 🔵 Search OpenFDA
@@ -42,20 +53,22 @@ export const getMedsFromOpenFDA = async (query, limit, skip) => {
   try {
     const response = await axios.get('https://api.fda.gov/drug/label.json', {
       params: {
-        search: `${query}`,
+        search: `openfda.brand_name:"${query}" + openfda.generic_name:"${query}"`, // Search in both brand and generic names
         limit,
         skip,
         api_key: OPENFDA_API_KEY,
       },
     });
 
-    return response.data.results
-      .filter(item => item.openfda?.brand_name?.[0] && item.openfda?.manufacturer_name?.[0])
-      .map((item, index) => ({
-      id: `openfda-${item.id}`,
-      name: item.openfda.brand_name[0],
-      manufacturer: item.openfda.manufacturer_name[0],
+    const data = response.data.results
+      .filter(item => item.openfda?.brand_name?.[0] || item.openfda?.generic_name?.[0])
+      .map(item => ({
+        id: `openfda-${item.id}`,
+        name: item.openfda.brand_name?.[0] || item.openfda.generic_name?.[0], // Use brand name or generic name
+        manufacturer: item.openfda.manufacturer_name?.[0] || 'Unknown',
       }));
+
+    return data;
   } catch (err) {
     console.error('OpenFDA API error:', err.message);
     return [];
