@@ -1,7 +1,6 @@
 //Not Continued
 import asyncHandler from 'express-async-handler';
-import Store from '../models/store.js';
-import { createAddress , updateAddress , deleteAddress} from './addressController.js';
+import {Store} from '../models/store.js';
 
 // Create a new store
 export const createStore = asyncHandler(async (req, res) => {
@@ -19,9 +18,31 @@ export const getStores = asyncHandler(async (req, res) => {
   res.status(200).json(stores);
 });
 
+// Get a store by ID
+export const getStorebyAuth = asyncHandler(async (req, res) => {
+  const id  = req.user.store_id;
+  const store = await Store.findById(id);
+  console.log(store);
+  if (!store) {
+    res.status(404);
+    throw new Error('Store not found');
+  }
+  
+  res.status(200).json(store);
+});
+
 // Update a store
 export const updateStore = asyncHandler(async (req, res) => {
   const { id } = req.params;
+  const updatedData = req.body;
+
+  const updatedStore = await Store.findByIdAndUpdate(id, updatedData, { new: true });
+  res.status(200).json(updatedStore);
+});
+
+// Update a store by ID
+export const updateStoreById = asyncHandler(async (req, res) => {
+  const { id } = req.user.store_id;
   const updatedData = req.body;
 
   const updatedStore = await Store.findByIdAndUpdate(id, updatedData, { new: true });

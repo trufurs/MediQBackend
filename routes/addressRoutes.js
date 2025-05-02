@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { roles } from '../middleware/rolesware.js';
 import { authcheck } from '../middleware/authware.js';
-import { getAddressAuth, getAddress, createAddress, getAddresses , updateAddressAuth , getAddressByCity , getAddressByLatLong} from '../controllers/addressController.js';
+import { getAddressByAuthWithStoreID, createAddress, getAddresses , updateAddressByAuthWithStoreID , getAddressByCity , getAddressByLatLong} from '../controllers/addressController.js';
 
 const router = Router();
 
@@ -10,8 +10,8 @@ router.route('/')
     .post(authcheck, roles('admin'), createAddress);
 
 router.route('/auth')
-    .get(authcheck, roles('store-owner'), getAddressAuth)
-    .put(authcheck, roles('store-owner'), updateAddressAuth);
+    .get(authcheck, roles('store-owner'), getAddressByAuthWithStoreID)
+    .put(authcheck, roles('store-owner'), updateAddressByAuthWithStoreID);
 
 router.route('/:city')
     .get( getAddressByCity);

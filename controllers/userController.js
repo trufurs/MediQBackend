@@ -10,12 +10,11 @@ const getUserProfile = asyncHandler(async (req, res) => {
 
 // auth Update user profile
 const updateUserProfile = asyncHandler(async (req, res) => {
-  if(!req.body.name || !req.body.email || !req.body.gender || !req.body.phone){
+  if(!req.body.name || !req.body.gender || !req.body.phone){
     throw new Error('BadRequestError');
   }
   const user = await User.findByIdAndUpdate(req.user.id ,{
     name: req.body.name,
-    email: req.body.email,
     gender: req.body.gender,
     phone: req.body.phone
   },{new:true});

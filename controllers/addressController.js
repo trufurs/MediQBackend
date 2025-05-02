@@ -33,6 +33,48 @@ export const createAddress = asyncHandler(async (req, res) => {
   res.status(201).json(savedAddress);
 });
 
+// Get address by Auth with store ID
+export const getAddressByAuthWithStoreID = asyncHandler(async (req, res) => {
+  const store_id  = req.user.store_id; // Assuming store_id is available in req.user
+
+  if (!store_id) {
+    return res.status(400).json({ message: 'Store ID is required' });
+  }
+
+  const address = await Address.findOne({ store: store_id });
+
+  if (!address) {
+    return res.status(404).json({ message: 'Address not found for the given store ID' });
+  }
+
+  res.status(200).json(address);
+});
+
+// Update address by Auth with store ID
+export const updateAddressByAuthWithStoreID = asyncHandler(async (req, res) => {
+  const { store_id } = req.user;
+
+  if (!store_id) {
+    return res.status(400).json({ message: 'Store ID is required' });
+  }
+
+  const address = await Address.findOne({ store: store_id });
+
+  if (!address) {
+    return res.status(404).json({ message: 'Address not found for the given store ID' });
+  }
+
+  const updatedData = req.body;
+
+  const updatedAddress = await Address.findByIdAndUpdate(
+    address._id,
+    { ...updatedData, store: store_id },
+    { new: true }
+  );
+
+  res.status(200).json(updatedAddress);
+});
+
 // Get all addresses
 export const getAddresses = asyncHandler(async (req, res) => {
   const addresses = await Address.find();
