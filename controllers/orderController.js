@@ -50,13 +50,13 @@ export const getOrdersAuth = asyncHandler(async (req, res) => {
 // Dev commands
 // Create a new order
 export const addOrder = asyncHandler(async (req, res) => {
-  const { store, seller, medicines, totalItems, status } = req.body;
+  const { store, seller, medicines, totalItems, remarks } = req.body;
   
   const session = await mongoose.startSession();
   session.startTransaction();
   
   try {
-    const order = new Order({ store, seller, medicines, totalItems, status });
+    const order = new Order({ store, seller, medicines, totalItems, remarks });
     const savedOrder = await order.save({ session });
 
     for (const data of medicines) {

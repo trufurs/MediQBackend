@@ -22,7 +22,6 @@ export const getStores = asyncHandler(async (req, res) => {
 export const getStorebyAuth = asyncHandler(async (req, res) => {
   const id  = req.user.store_id;
   const store = await Store.findById(id);
-  console.log(store);
   if (!store) {
     res.status(404);
     throw new Error('Store not found');

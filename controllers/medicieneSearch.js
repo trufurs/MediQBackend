@@ -20,8 +20,11 @@ export const getMeds = async (req, res) => {
   }
 
   // Search in OpenFDA
+  if(source === 'any' || source === 'openfda') {
   const openFdaResults = await getMedsFromOpenFDA(query, limit, skip);
   return res.json(openFdaResults);
+  }
+  return res.status(404).json({ error: 'No results found' });
 };
 
 // 🟢 Search DB
