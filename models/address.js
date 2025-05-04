@@ -14,12 +14,11 @@ const addressSchema = new Schema({
   location: {
     type: {
       type: String,
-      enum: ['Point'],
-      default: 'Point'  // not required
+      enum: ['Point']
     },
     coordinates: {
-      type: [Number,Number],   // [longitude, latitude]
-      default: [0,0]  // so it's optional
+      type: [Number],   // [longitude, latitude] as floats
+      required: false
     }
   }
 }, { timestamps: true });
@@ -27,15 +26,5 @@ const addressSchema = new Schema({
 // Add 2dsphere index if location exists
 addressSchema.index({ location: '2dsphere' });
 
-// Auto-generate location from lat/lng if not set
-addressSchema.pre('save', function (next) {
-  if (!this.location && this.latitude && this.longitude) {
-    this.location = {
-      type: 'Point',
-      coordinates: [this.longitude, this.latitude]
-    };
-  }
-  next();
-});
 
 export const Address = model('Address', addressSchema);

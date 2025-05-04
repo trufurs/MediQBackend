@@ -68,6 +68,10 @@ const updateRequest = asyncHandler(async (req, res) => {
               state: request.address.state,
               postalCode: request.address.postalCode,
               country: request.address.country,
+              location: {
+                    type: 'Point',
+                    coordinates: [request.address.longitude, request.address.latitude]
+                },
           }], { session });
 
           const updateUser = await User.findByIdAndUpdate(

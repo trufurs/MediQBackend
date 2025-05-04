@@ -124,7 +124,7 @@ export const getAddressByLatLong = asyncHandler(async (req, res) => {
         $centerSphere: [[longitude, latitude], radius / 6378.1] // Convert radius to radians
       }
     }
-  });
+  }).populate('store');
 
   if (addresses.length === 0) {
     return res.status(200).json({ message: 'No places found' });

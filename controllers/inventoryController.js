@@ -105,7 +105,7 @@ export const getStoresWithMedicineNearby = asyncHandler(async (req, res) => {
                       coordinates: [parseFloat(lng), parseFloat(lat)]
                   },
                   distanceField: 'distance', // Add distance to the result
-                  maxDistance: radius * 1000 * 500 , // Convert radius from km to meters
+                  maxDistance: radius * 1000 , // Convert radius from km to meters
                   spherical: true, // Enable spherical calculations
                   query: {} // Initial query can be empty
               }
@@ -158,3 +158,4 @@ export const getStoresWithMedicineNearby = asyncHandler(async (req, res) => {
       res.status(500).json({ message: 'Internal server error', error: error.message }); // Include error message
   }
 });
+
