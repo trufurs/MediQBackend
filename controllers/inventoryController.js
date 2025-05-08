@@ -99,55 +99,69 @@ export const getStoresWithMedicineNearby = asyncHandler(async (req, res) => {
   try {
       const fullInventory = await Address.aggregate([
           {
-              $geoNear: {
-                  near: {
-                      type: 'Point',
-                      coordinates: [parseFloat(lng), parseFloat(lat)]
-                  },
-                  distanceField: 'distance', // Add distance to the result
-                  maxDistance: radius * 1000 , // Convert radius from km to meters
-                  spherical: true, // Enable spherical calculations
-                  query: {} // Initial query can be empty
-              }
+          $geoNear: {
+          near: {
+              type: 'Point',
+              coordinates: [parseFloat(lng), parseFloat(lat)]
+          },
+          distanceField: 'distance', // Add distance to the result
+          maxDistance: radius * 1000, // Convert radius from km to meters
+          spherical: true, // Enable spherical calculations
+          query: {} // Initial query can be empty
+          }
           },
           {
-              $lookup: {
-                  from: 'inventories', // Join with the Inventory collection
-                  localField: 'store',
-                  foreignField: 'store',
-                  as: 'inventoryData',
-              },
+          $lookup: {
+          from: 'inventories', // Join with the Inventory collection
+          localField: 'store',
+          foreignField: 'store',
+          as: 'inventoryData',
           },
-           { $unwind: {
-                  path: '$inventoryData',
-                  preserveNullAndEmptyArrays: false // Ensure only stores with inventory are returned
-              }},
-          {
-              $match: {
-                  'inventoryData.medicine': new mongoose.Types.ObjectId(medicine),
-                  'inventoryData.quantity': { $gt: 0 }
-              }
+          },
+          { 
+          $unwind: {
+          path: '$inventoryData',
+          preserveNullAndEmptyArrays: false // Ensure only stores with inventory are returned
+          }
           },
           {
-              $project: {
-                  _id: 0,
-                  store: 1,
-                  medicine: '$inventoryData.medicine',
-                  quantity: '$inventoryData.quantity',
-                  expiryDate: '$inventoryData.expiryDate',
-                  distance: 1,
-                  'storeAddress.street': '$street',
-                  'storeAddress.city': '$city',
-                  'storeAddress.state': '$state',
-                  'storeAddress.postalCode': '$postalCode',
-                  'storeAddress.country': '$country',
-                  'storeAddress.location': '$location',
-              },
+          $match: {
+          'inventoryData.medicine': new mongoose.Types.ObjectId(medicine),
+          'inventoryData.quantity': { $gt: 0 }
+          }
+          },
+          {
+          $lookup: {
+          from: 'stores', // Join with the Store collection
+          localField: 'store',
+          foreignField: '_id',
+          as: 'storeDetails',
+          },
+          },
+          {
+          $unwind: {
+          path: '$storeDetails',
+          preserveNullAndEmptyArrays: true // Include store details even if null
+          }
+          },
+          {
+          $project: {
+          _id: 0,
+          store: 1,
+          storeDetails: 1, // Include populated store details
+          medicine: '$inventoryData.medicine',
+          quantity: '$inventoryData.quantity',
+          expiryDate: '$inventoryData.expiryDate',
+          distance: 1,
+          'storeAddress.street': '$street',
+          'storeAddress.city': '$city',
+          'storeAddress.state': '$state',
+          'storeAddress.postalCode': '$postalCode',
+          'storeAddress.country': '$country',
+          'storeAddress.location': '$location',
+          },
           },
       ]);
-
-      console.log('Full Inventory:', fullInventory);
-
       if (fullInventory.length === 0) {
           return res.status(404).json({ message: 'No nearby stores found with this medicine' });
       }
